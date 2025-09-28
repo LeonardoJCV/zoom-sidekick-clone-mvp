@@ -1,0 +1,18 @@
+ Transcrição Completa 
+Candidato: Comece a entrevista se apresentando e fazendo a primeira pergunta.
+Entrevistador: Olá! Eu sou o Sidekick, e estou aqui para conversar com você sobre a oportunidade de desenvolvedor Python. É um prazer ter você aqui hoje. 
+
+Para começarmos, poderia me contar um pouco sobre sua experiência com Python?
+Candidato:  o desenvolvedor python, o autocompaio python flask, django e fesh api.
+Entrevistador: Entendi! Você parece ter conhecimento sobre algumas das principais frameworks e bibliotecas utilizadas em desenvolvimento web com Python.
+
+Você poderia me dizer qual é a sua experiência com o Django? Já desenvolveu algum projeto com essa framework?
+Candidato: ere introducei.
+Entrevistador: Desculpe, parece que houve um problema de comunicação. Você poderia repetir ou reintroduzir sua experiência com Django? Qual foi o seu papel nesse projeto e quais foram as principais tarefas que você realizou?
+Candidato:  entrevista.
+Entrevistador: Voltando à entrevista...
+
+Você mencionou anteriormente que conhece Flask, Django e Fast API. Como você escolheria qual framework utilizar em um novo projeto? Quais seriam os fatores que você consideraria nessa decisão?
+
+
+ Resumo Gerado pela IA 
