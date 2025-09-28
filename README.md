@@ -16,6 +16,7 @@ Este projeto utiliza **somente ferramentas open-source** para capturar o áudio 
 - 📝 Transcrição automática com Whisper local
 - 📄 Geração de resumo e avaliação do candidato via IA
 - 💾 Exporta a conversa e o resumo para arquivo `.txt`
+- </> Para finalização e entrega do resumo da entrevista diga "encerrar entrevista"
 
 ---
 
