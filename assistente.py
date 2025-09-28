@@ -24,14 +24,14 @@ historico_conversa = [
     }
 ]
 
-# Tenta encontrar o índice de um dispositivo de áudio virtual (Fallback)
+# Tenta encontrar o índice de um dispositivo de áudio virtual (Principal (FIX))
 def encontrar_cabo_virtual():
     PALAVRAS_CHAVE_CABO_VIRTUAL = ["cable", "blackhole"]
     try:
         for index, name in enumerate(sr.Microphone.list_microphone_names()):
             nome_dispositivo_lower = name.lower()
             if any(palavra in nome_dispositivo_lower for palavra in PALAVRAS_CHAVE_CABO_VIRTUAL):
-                print(f"Fallback: Cabo de áudio virtual encontrado no índice {index}: '{name}'")
+                print(f"Dispositivo principal: Cabo de áudio virtual encontrado no índice {index}: '{name}'")
                 return index
     except Exception as e:
         print(f"Ocorreu um erro ao procurar por cabo virtual: {e}")
@@ -127,6 +127,7 @@ def selecionar_modo_execucao():
             print("Escolha inválida. Por favor, digite 1 ou 2.")
 
 # Configura os dispositivos, inicia a conversa e gerencia o loop de interação.
+# FIX: alternagem de fallback
 def main():
     modo = selecionar_modo_execucao()
     reconhecedor = sr.Recognizer()
@@ -135,29 +136,31 @@ def main():
     indice_cabo_virtual = None
 
     if modo == '1': # Modo ao vivo
-        print("\nModo entrevista ativado")
-        # Utiliza loopback
-        print("Captura de audio: Loopback Automático")
-        try:
-            dispositivo_loopback_speaker = sc.default_speaker()
-            print(f"Sucesso! Ouvindo a saída de áudio do sistema via: '{dispositivo_loopback_speaker.name}'")
-            metodo_captura = "loopback"
-        except Exception as e:
-            print(f"Aviso: O método de captura Loopback falhou. ({e})")
-            print("Isso é comum no macOS. Tentando o próximo método...")
-            # Utiliza cabo virtual (Fallback)
-            if metodo_captura is None:
-                print("\nCaptura de audio: Cabo de Áudio Virtual")
-                indice_cabo_virtual = encontrar_cabo_virtual()
-                if indice_cabo_virtual is not None:
-                    metodo_captura = "cabo_virtual"
-                else:
-                    print("\nERRO: Nenhum método de captura de áudio funcional foi encontrado.")
-                    print("Soluções possíveis:")
-                    print("(Recomendado) Instale um cabo de áudio virtual (VB-CABLE para Windows, BlackHole para macOS).")
-                    print("Verifique se seus drivers de áudio estão funcionando corretamente.")
-                    exit()
-    
+        print("\nModo entrevista ativado.")
+        
+        # Tenta usar o cabo de áudio virtual primeiro.
+        print("Captura de áudio: Tentando Cabo de Áudio Virtual (Principal)")
+        indice_cabo_virtual = encontrar_cabo_virtual()
+        
+        if indice_cabo_virtual is not None:
+            metodo_captura = "cabo_virtual"
+        else:
+            # FALLBACK: Se o cabo virtual não for encontrado, tenta usar o loopback do soundcard.
+            print("Aviso: Cabo de áudio virtual não encontrado.")
+            print("Tentando método alternativo (Fallback): Loopback de áudio do sistema (soundcard).")
+            try:
+                dispositivo_loopback_speaker = sc.default_speaker()
+                print(f"Sucesso! Usando fallback via soundcard: '{dispositivo_loopback_speaker.name}'")
+                metodo_captura = "loopback"
+            except Exception as e:
+                # Se ambos os métodos falharem, exibe o erro final.
+                print(f"\nERRO: O método de captura Loopback (fallback) também falhou. ({e})")
+                print("Nenhum método de captura de áudio funcional foi encontrado.")
+                print("Soluções possíveis:")
+                print("(Recomendado) Instale um cabo de áudio virtual (ex: VB-CABLE para Windows, BlackHole para macOS).")
+                print("Verifique se seus drivers de áudio estão funcionando corretamente.")
+                exit()
+
     elif modo == '2': # modo de teste
         print("\nModo teste ativado")
         print("Ouvindo o microfone padrão do sistema.")
@@ -174,7 +177,7 @@ def main():
             texto_transcrito = None
             
             if metodo_captura == "loopback":
-                print("\nOuvindo via Loopback... Fale na chamada durante os próximos 7 segundos.")
+                print("\nOuvindo via Loopback (Fallback)... Fale na chamada durante os próximos 7 segundos.")
                 with sc.get_microphone(id=str(dispositivo_loopback_speaker.id), include_loopback=True).recorder(samplerate=16000) as gravador:
                     dados_gravados = gravador.record(numframes=16000 * 7)
                 if dados_gravados.size > 0 and np.max(np.abs(dados_gravados)) > 0.01:
@@ -188,7 +191,7 @@ def main():
             
             elif metodo_captura in ["cabo_virtual", "microfone_padrao"]:
                 source = sr.Microphone() if metodo_captura == "microfone_padrao" else sr.Microphone(device_index=indice_cabo_virtual)
-                prompt = "\nOuvindo seu microfone... Fale agora." if metodo_captura == "microfone_padrao" else "\nOuvindo via Cabo Virtual... Fale na chamada."
+                prompt = "\nOuvindo seu microfone... Fale agora." if metodo_captura == "microfone_padrao" else "\nOuvindo via Cabo Virtual (Principal)... Fale na chamada."
                 print(prompt)
                 with source as s:
                     reconhecedor.adjust_for_ambient_noise(s, duration=1)
